@@ -46,9 +46,11 @@ class CertificateManager {
             throw CertificateError.noIdentityFound
         }
 
-        guard let identity = first[kSecImportItemIdentity as String] as? SecIdentity else {
+        guard let identityAny = first[kSecImportItemIdentity as String] else {
             throw CertificateError.noIdentityFound
         }
+        // swiftlint:disable force_cast
+        let identity = identityAny as! SecIdentity
 
         // Extract certificate
         var certRef: SecCertificate?
