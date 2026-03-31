@@ -73,7 +73,7 @@ struct ContentView: View {
             } message: { msg in
                 Text(msg)
             }
-            .onChange(of: state.errorMessage) { msg in
+            .onChange(of: state.errorMessage) { _, msg in
                 showingError = msg != nil
             }
         }
@@ -469,3 +469,4 @@ struct ShareSheet: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
+
