@@ -14,14 +14,12 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate Xcode project
-        run: cd IPASigner && xcodegen generate
+        run: xcodegen generate --spec project.yml
       - name: Resolve packages
         run: |
-          cd IPASigner
           xcodebuild -resolvePackageDependencies -project IPASigner.xcodeproj -scheme IPASigner
       - name: Build archive
         run: |
-          cd IPASigner
           xcodebuild archive -project IPASigner.xcodeproj -scheme IPASigner -configuration Release -destination "generic/platform=iOS" -archivePath ../build/IPASigner.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" AD_HOC_CODE_SIGNING_ALLOWED=YES
       - name: Package IPA
         run: |
