@@ -46,7 +46,7 @@ class CertificateManager {
             throw CertificateError.noIdentityFound
         }
 
-        guard let identity = first[kSecImportItemIdentity as String] as! SecIdentity? else {
+        guard let identity = first[kSecImportItemIdentity as String] as? SecIdentity else {
             throw CertificateError.noIdentityFound
         }
 
@@ -160,7 +160,7 @@ class CertificateManager {
         let status = SecItemCopyMatching(query as CFDictionary, &result)
 
         guard status == errSecSuccess else { return nil }
-        return (result as! SecIdentity)
+        return result as! SecIdentity
     }
 }
 
