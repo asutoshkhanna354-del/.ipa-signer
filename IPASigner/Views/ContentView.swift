@@ -314,21 +314,23 @@ struct ContentView: View {
 
             url.stopAccessingSecurityScopedResource()
 
-            DispatchQueue.main.async {
-                switch self.importType {
+            let capturedImportType = importType
+            let capturedManager = signingManager
+            Task { @MainActor in
+                switch capturedImportType {
                 case .ipa:
-                    self.signingManager.state.ipaURL = destURL
+                    capturedManager.state.ipaURL = destURL
                     LogManager.shared.log("Imported IPA: \(destURL.lastPathComponent)")
                 case .p12:
-                    self.signingManager.state.p12URL = destURL
+                    capturedManager.state.p12URL = destURL
                     LogManager.shared.log("Imported certificate: \(destURL.lastPathComponent)")
                 case .mobileprovision:
-                    self.signingManager.state.provisionURL = destURL
+                    capturedManager.state.provisionURL = destURL
                     LogManager.shared.log("Imported provisioning profile: \(destURL.lastPathComponent)")
 
                     // Auto-parse profile info
                     if let profile = try? ProvisioningProfile.parse(from: destURL) {
-                        self.signingManager.state.bundleID = profile.bundleIdentifier
+                        capturedManager.state.bundleID = profile.bundleIdentifier
                         LogManager.shared.log("Profile bundle ID: \(profile.bundleIdentifier)")
                         if profile.isExpired {
                             LogManager.shared.log("⚠️ Warning: Provisioning profile is expired!")
