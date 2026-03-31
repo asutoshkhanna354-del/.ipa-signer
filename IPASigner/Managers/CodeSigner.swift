@@ -590,7 +590,7 @@ enum SigningError: LocalizedError {
 extension Data {
     mutating func appendUInt32BE(_ value: UInt32) {
         var v = value.bigEndian
-        self.append(contentsOf: withUnsafeBytes(of: &v) { Array($0) })
+        Swift.withUnsafeBytes(of: &v) { self.append(contentsOf: $0) }
     }
 
     func loadUInt32BE(at offset: Int) -> UInt32 {
