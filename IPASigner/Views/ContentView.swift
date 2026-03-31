@@ -6,7 +6,7 @@ import UniformTypeIdentifiers
 struct ContentView: View {
     @EnvironmentObject var signingManager: SigningManager
     @EnvironmentObject var logManager: LogManager
-    @StateObject private var otaInstaller = OTAInstaller.shared
+    private let otaInstaller = OTAInstaller.shared
 
     @State private var showingImporter = false
     @State private var importType: ImportType = .ipa
@@ -73,9 +73,9 @@ struct ContentView: View {
             } message: { msg in
                 Text(msg)
             }
-            .onChange(of: state.errorMessage) { _, msg in
+            .onChange(of: state.errorMessage, perform: { msg in
                 showingError = msg != nil
-            }
+            })
         }
     }
 
@@ -136,7 +136,7 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 8) {
             SectionHeader(title: "Certificate Password", icon: "lock")
 
-            SecureField("Enter .p12 password", text: signingManager.$state.p12Password)
+            SecureField("Enter .p12 password", text: $signingManager.state.p12Password)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
