@@ -41,11 +41,11 @@ struct LogView: View {
                     .padding(8)
                 }
                 .background(Color.black)
-                .onChange(of: logManager.logs.count) { _, _ in
+                .onChange(of: logManager.logs.count, perform: { _ in
                     if autoScroll, let lastID = logManager.logs.last?.id {
                         withAnimation {
                             proxy.scrollTo(lastID, anchor: .bottom)
-                        }
+                            })
                     }
                 }
             }
