@@ -45,9 +45,9 @@ struct LogView: View {
                     if autoScroll, let lastID = logManager.logs.last?.id {
                         withAnimation {
                             proxy.scrollTo(lastID, anchor: .bottom)
-                            })
+                        }
                     }
-                }
+                })
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 10))
