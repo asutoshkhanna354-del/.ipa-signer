@@ -564,7 +564,6 @@ import SwiftUI
   extension Color {
       init(hex: String) {
           var h = hex.trimmingCharacters(in: .alphanumerics.inverted)
-          if h.count == 6 { h = h }
           var val: UInt64 = 0
           Scanner(string: h).scanHexInt64(&val)
           let r = Double((val & 0xFF0000) >> 16) / 255
