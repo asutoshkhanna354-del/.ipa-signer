@@ -7,7 +7,7 @@ import Foundation
 
       @Published var state = SigningState()
       private let processor = IPAProcessor()
-      private let signer = CodeSigner()
+      private let signer    = CodeSigner()
 
       func signIPA() async {
           guard state.canSign else {
@@ -28,73 +28,95 @@ import Foundation
               if let info = try? processor.infoPlist(in: appURL) {
                   let bid = info["CFBundleIdentifier"] as? String ?? "com.unknown"
                   let ver = info["CFBundleShortVersionString"] as? String ?? "1.0"
-                  let ttl = info["CFBundleDisplayName"] as? String ?? info["CFBundleName"] as? String ?? "App"
+                  let ttl = info["CFBundleDisplayName"] as? String
+                      ?? info["CFBundleName"] as? String
+                      ?? "App"
                   await MainActor.run {
-                      state.bundleID  = bid
+                      state.bundleID   = bid
                       state.appVersion = ver
-                      state.appTitle  = ttl
+                      state.appTitle   = ttl
                   }
                   LogManager.shared.log("App: \(ttl) (\(bid)) v\(ver)")
               }
 
-              // 3. Load cert (VaultSign bundled or custom)
+              // 3. Load cert & profile
               await setStep(.loadingCertificate)
               let certInfo: CertificateManager.CertificateInfo
+              let entitlementsData: Data
               let teamID: String
 
               if state.signingMode == .vaultSign {
+                  // Quick Sign: use bundled Apple Distribution cert + provisioning profile
                   certInfo = try VaultSignCertManager.loadCertificate()
-                  teamID = "VAULTSIGN1"
-                  LogManager.shared.log("Using VaultSign built-in certificate")
-              } else {
-                  guard let p12URL = state.p12URL else { throw CertificateError.noIdentityFound }
-                  certInfo = try CertificateManager.loadP12(from: p12URL, password: state.p12Password)
-                  teamID = "TEAMID"
+                  teamID   = VaultSignCertManager.teamID
                   LogManager.shared.log("Certificate: \(certInfo.commonName)")
-              }
 
-              // 4. Remove old signature
-              await setStep(.removingSignature)
-              let entitlementsData: Data
+                  await setStep(.parsingProfile)
+                  let provisionData = try VaultSignCertManager.loadProvisionData()
 
-              if state.signingMode == .custom, let provURL = state.provisionURL {
+                  await setStep(.removingSignature)
+                  try processor.prepareBundleForSigning(appURL: appURL, provisionData: provisionData)
+
+                  // Parse profile to extract entitlements
+                  let tmpProfile = FileManager.default.temporaryDirectory
+                      .appendingPathComponent("vs_provision_\(UUID().uuidString).mobileprovision")
+                  try provisionData.write(to: tmpProfile)
+                  defer { try? FileManager.default.removeItem(at: tmpProfile) }
+
+                  let profile = try ProvisioningProfile.parse(from: tmpProfile)
+                  LogManager.shared.log("Profile: \(profile.name) [\(profile.teamName)]")
+                  entitlementsData = try profile.entitlementsPlistData()
+
+              } else {
+                  // Custom Sign: user-provided cert + profile
+                  guard let p12URL    = state.p12URL,
+                        let provURL   = state.provisionURL else {
+                      throw CertificateError.noIdentityFound
+                  }
+                  certInfo = try CertificateManager.loadP12(from: p12URL, password: state.p12Password)
+                  teamID   = "TEAMID"
+                  LogManager.shared.log("Certificate: \(certInfo.commonName)")
+
                   await setStep(.parsingProfile)
                   let profile = try ProvisioningProfile.parse(from: provURL)
                   LogManager.shared.log("Profile: \(profile.name)")
+
+                  await setStep(.removingSignature)
                   try processor.prepareBundleForSigning(appURL: appURL, provisionData: profile.rawData)
                   entitlementsData = try profile.entitlementsPlistData()
-              } else {
-                  // VaultSign mode: remove signature, use minimal entitlements
-                  try processor.prepareBundleForSigning(appURL: appURL, provisionData: Data())
-                  entitlementsData = minimalEntitlements(bundleID: state.bundleID.isEmpty ? "com.vaultsign.signed" : state.bundleID)
               }
 
-              // 5. Sign bundles
+              // 4. Sign frameworks & bundles
               await setStep(.signingBundles)
               let bundles = try processor.allBundlesToSign(in: appURL)
-              LogManager.shared.log("Bundles: \(bundles.count)")
+              LogManager.shared.log("Bundles to sign: \(bundles.count)")
               for bundleURL in bundles.dropLast() {
-                  try? signer.sign(bundleURL: bundleURL, identity: certInfo.identity, entitlements: entitlementsData, teamID: teamID)
+                  try? signer.sign(bundleURL: bundleURL,
+                                   identity: certInfo.identity,
+                                   entitlements: entitlementsData,
+                                   teamID: teamID)
               }
 
-              // 6. Sign main app
+              // 5. Sign main app bundle
               await setStep(.signingApp)
               if let main = bundles.last {
-                  try signer.sign(bundleURL: main, identity: certInfo.identity, entitlements: entitlementsData, teamID: teamID)
+                  try signer.sign(bundleURL: main,
+                                  identity: certInfo.identity,
+                                  entitlements: entitlementsData,
+                                  teamID: teamID)
               }
 
-              // 7. Repackage
+              // 6. Repackage
               await setStep(.repackaging)
-              let outName = "VaultSign_\(ipaURL.lastPathComponent)"
+              let outName  = "VaultSign_\(ipaURL.lastPathComponent)"
               let signedURL = try processor.repackage(outputName: outName)
 
               await MainActor.run {
                   state.signedIPAURL = signedURL
-                  state.currentStep = .done
+                  state.currentStep  = .done
                   state.isProcessing = false
               }
-              LogManager.shared.log("=== Signing Complete ===")
-              LogManager.shared.log("Output: \(signedURL.lastPathComponent)")
+              LogManager.shared.log("=== Signing Complete: \(signedURL.lastPathComponent) ===")
 
           } catch {
               LogManager.shared.log("✗ \(error.localizedDescription)")
@@ -102,19 +124,7 @@ import Foundation
           }
       }
 
-      // Minimal entitlements for VaultSign mode
-      private func minimalEntitlements(bundleID: String) -> Data {
-          let plist = """
-  <?xml version=\"1.0\" encoding=\"UTF-8\"?>
-  <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-  <plist version=\"1.0\"><dict>
-  <key>application-identifier</key><string>VAULTSIGN1.\(bundleID)</string>
-  <key>get-task-allow</key><false/>
-  </dict></plist>
-  """
-          return plist.data(using: .utf8) ?? Data()
-      }
-
+      // MARK: - Helpers
       private func setProcessing(_ v: Bool) async { await MainActor.run { state.isProcessing = v } }
       private func setStep(_ s: SigningStep) async {
           await MainActor.run {
@@ -125,7 +135,7 @@ import Foundation
       private func setError(_ msg: String) async {
           await MainActor.run {
               state.errorMessage = msg
-              state.currentStep = .error
+              state.currentStep  = .error
               state.isProcessing = false
           }
       }
