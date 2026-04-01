@@ -65,7 +65,7 @@ import Foundation
                   entitlementsData = try profile.entitlementsPlistData()
               } else {
                   // VaultSign mode: remove signature, use minimal entitlements
-                  try processor.prepareBundleForSigning(appURL: appURL, provisionData: nil)
+                  try processor.prepareBundleForSigning(appURL: appURL, provisionData: Data())
                   entitlementsData = minimalEntitlements(bundleID: state.bundleID.isEmpty ? "com.vaultsign.signed" : state.bundleID)
               }
 
