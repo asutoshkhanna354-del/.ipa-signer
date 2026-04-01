@@ -1,22 +1,4 @@
 #!/bin/bash
-# Wrapper: removes -sdk flag and adds -destination for archive on Xcode 16.2+ runners
+# Pass-through wrapper (destination is now set in workflow YAML)
 REAL="/Applications/Xcode_16.2.app/Contents/Developer/usr/bin/xcodebuild"
-
-IS_ARCHIVE=0
-for arg in "$@"; do
-  if [[ "$arg" == "archive" ]]; then IS_ARCHIVE=1; break; fi
-done
-
-if [[ $IS_ARCHIVE -eq 1 ]]; then
-  # Rebuild args without -sdk flag (let destination determine SDK)
-  NEWARGS=()
-  SKIP_NEXT=0
-  for arg in "$@"; do
-    if [[ $SKIP_NEXT -eq 1 ]]; then SKIP_NEXT=0; continue; fi
-    if [[ "$arg" == "-sdk" ]]; then SKIP_NEXT=1; continue; fi
-    NEWARGS+=("$arg")
-  done
-  exec "$REAL" "${NEWARGS[@]}" -destination 'generic/platform=iOS'
-fi
-
 exec "$REAL" "$@"
