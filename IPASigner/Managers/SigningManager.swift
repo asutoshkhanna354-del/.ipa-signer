@@ -64,7 +64,7 @@ import Foundation
                   defer { try? FileManager.default.removeItem(at: tmpProfile) }
 
                   let profile = try ProvisioningProfile.parse(from: tmpProfile)
-                  LogManager.shared.log("Profile: \(profile.name) [\(profile.teamName)]")
+                  LogManager.shared.log("Profile: \(profile.name) [\(profile.teamIdentifier)]")
                   entitlementsData = try profile.entitlementsPlistData()
 
               } else {
