@@ -40,6 +40,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.ipasigner.app
         SWIFT_VERSION: "5.9"
         TARGETED_DEVICE_FAMILY: "1,2"
+        SKIP_INSTALL: NO
+        INSTALL_PATH: /Applications
     dependencies:
       - package: ZIPFoundation
 
@@ -47,6 +49,13 @@ schemes:
   IPASigner:
     build:
       targets:
-        IPASigner: all
+        IPASigner:
+          run: true
+          test: false
+          profile: true
+          analyze: true
+          archive: true
+    run:
+      config: Debug
     archive:
       config: Release
