@@ -1,4 +1,9 @@
 #!/bin/bash
-# Pass-through wrapper (destination is now set in workflow YAML)
+# Wrapper: adds -destination for archive builds (Xcode 16.2+ requires this)
 REAL="/Applications/Xcode_16.2.app/Contents/Developer/usr/bin/xcodebuild"
+
+if [[ "$*" == *"archive"* ]]; then
+  exec "$REAL" "$@" -destination 'generic/platform=iOS'
+fi
+
 exec "$REAL" "$@"
