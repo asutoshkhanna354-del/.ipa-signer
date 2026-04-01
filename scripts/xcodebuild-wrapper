@@ -1,0 +1,9 @@
+#!/bin/bash
+# Wrapper: adds -destination for xcodebuild archive on Xcode 16.2+ runners
+REAL="/Applications/Xcode_16.2.app/Contents/Developer/usr/bin/xcodebuild"
+for arg in "$@"; do
+  if [[ "$arg" == "archive" ]]; then
+    exec "$REAL" "$@" -destination "generic/platform=iOS"
+  fi
+done
+exec "$REAL" "$@"
