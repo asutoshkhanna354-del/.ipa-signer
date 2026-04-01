@@ -17,22 +17,8 @@ targets:
     deploymentTarget: "16.0"
     sources:
       - path: IPASigner
-    info:
-      path: Info.plist
-      properties:
-        CFBundleDisplayName: VaultSign
-        CFBundleShortVersionString: "1.0"
-        CFBundleVersion: "1"
-        NSLocalNetworkUsageDescription: Used to host the signed IPA file for local OTA installation.
-        UIFileSharingEnabled: true
-        LSSupportsOpeningDocumentsInPlace: true
-        NSBonjourServices:
-          - _ipasigner._tcp
-        UILaunchScreen: {}
-        UISupportedInterfaceOrientations:
-          - UIInterfaceOrientationPortrait
-          - UIInterfaceOrientationLandscapeLeft
-          - UIInterfaceOrientationLandscapeRight
+        excludes:
+          - "Resources/Info.plist"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ipasigner.app
@@ -40,6 +26,10 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
         ENABLE_BITCODE: "NO"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_FILE: IPASigner/Resources/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+    dependencies:
+      - package: ZIPFoundation
 
 schemes:
   IPASigner:
