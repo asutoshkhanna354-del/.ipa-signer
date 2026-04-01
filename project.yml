@@ -28,7 +28,6 @@ targets:
         NSLocalNetworkUsageDescription: VaultSign uses local networking to host signed IPAs for OTA installation.
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
-        UISupportsDocumentBrowser: true
         NSBonjourServices:
           - _ipasigner._tcp
         UILaunchScreen: {}
