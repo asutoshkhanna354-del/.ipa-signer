@@ -91,7 +91,7 @@ import SwiftUI
                       Image(systemName: "info.circle.fill")
                           .foregroundColor(blue)
                           .font(.system(size: 12))
-                      Text("Signs with VaultSign's built-in certificate. Select your IPA and tap Sign.")
+                      Text("Signs with Apple Distribution cert (iPhone Distribution: XL AXIATA). Select your IPA and tap Sign.")
                           .font(.system(size: 12))
                           .foregroundColor(Color.gray)
                   }
