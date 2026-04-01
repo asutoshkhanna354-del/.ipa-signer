@@ -1,12 +1,17 @@
 import SwiftUI
 
-@main
-struct IPASignerApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .environmentObject(SigningManager.shared)
-                .environmentObject(LogManager.shared)
-        }
-    }
-}
+  @main
+  struct VaultSignApp: App {
+      @StateObject private var signingManager = SigningManager.shared
+      @StateObject private var logManager    = LogManager.shared
+
+      var body: some Scene {
+          WindowGroup {
+              ContentView()
+                  .environmentObject(signingManager)
+                  .environmentObject(logManager)
+                  .preferredColorScheme(.dark)
+          }
+      }
+  }
+  
