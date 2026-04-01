@@ -1,0 +1,47 @@
+name: IPASigner
+options:
+  bundleIdPrefix: com.ipasigner
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "15.4"
+
+packages:
+  ZIPFoundation:
+    url: https://github.com/weichsel/ZIPFoundation.git
+    from: 0.9.19
+
+targets:
+  IPASigner:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: IPASigner
+        excludes:
+          - "Resources/Info.plist"
+    info:
+      path: IPASigner/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: VaultSign
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        NSLocalNetworkUsageDescription: Used to host the signed IPA file for local OTA installation.
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
+        NSBonjourServices:
+          - _ipasigner._tcp
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ipasigner.app
+        PRODUCT_NAME: VaultSign
+        SWIFT_VERSION: "5.9"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ENABLE_BITCODE: "NO"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    dependencies:
+      - package: ZIPFoundation
