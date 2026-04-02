@@ -3,22 +3,22 @@ import Foundation
 
   enum SigningMode { case vaultSign, custom }
 
-  class SigningState: ObservableObject {
-      @Published var signingMode: SigningMode = .vaultSign
-      @Published var ipaURL: URL?
-      @Published var p12URL: URL?
-      @Published var provisionURL: URL?
-      @Published var p12Password: String = ""
-      @Published var signedIPAURL: URL?
-      @Published var isProcessing: Bool = false
-      @Published var currentStep: SigningStep = .idle
-      @Published var errorMessage: String?
-      @Published var bundleID: String = ""
-      @Published var appVersion: String = "1.0"
-      @Published var appTitle: String = "App"
+  struct SigningState {
+      var signingMode: SigningMode = .vaultSign
+      var ipaURL: URL?
+      var p12URL: URL?
+      var provisionURL: URL?
+      var p12Password: String = ""
+      var signedIPAURL: URL?
+      var isProcessing: Bool = false
+      var currentStep: SigningStep = .idle
+      var errorMessage: String?
+      var bundleID: String = ""
+      var appVersion: String = "1.0"
+      var appTitle: String = "App"
 
-      var ipaName: String    { ipaURL?.lastPathComponent    ?? "Tap to select IPA" }
-      var p12Name: String    { p12URL?.lastPathComponent    ?? "Tap to select .p12" }
+      var ipaName: String       { ipaURL?.lastPathComponent       ?? "Tap to select IPA" }
+      var p12Name: String       { p12URL?.lastPathComponent       ?? "Tap to select .p12" }
       var provisionName: String { provisionURL?.lastPathComponent ?? "Tap to select .mobileprovision" }
 
       var canSign: Bool {
@@ -29,7 +29,7 @@ import Foundation
 
       var isReadyToInstall: Bool { signedIPAURL != nil }
 
-      func reset() {
+      mutating func reset() {
           ipaURL = nil; p12URL = nil; provisionURL = nil
           p12Password = ""; signedIPAURL = nil
           isProcessing = false; currentStep = .idle; errorMessage = nil
@@ -38,17 +38,17 @@ import Foundation
   }
 
   enum SigningStep: String, CaseIterable {
-      case idle            = "Ready"
-      case extractingIPA   = "Extracting IPA…"
-      case parsingProfile  = "Parsing profile…"
+      case idle               = "Ready"
+      case extractingIPA      = "Extracting IPA…"
+      case parsingProfile     = "Parsing profile…"
       case loadingCertificate = "Loading certificate…"
       case removingSignature  = "Removing old signature…"
       case replacingProfile   = "Replacing profile…"
-      case signingBundles  = "Signing frameworks…"
-      case signingApp      = "Signing app bundle…"
-      case repackaging     = "Repackaging…"
-      case done            = "Done ✓"
-      case error           = "Error"
+      case signingBundles     = "Signing frameworks…"
+      case signingApp         = "Signing app bundle…"
+      case repackaging        = "Repackaging…"
+      case done               = "Done ✓"
+      case error              = "Error"
       var isActive: Bool { self != .idle && self != .done && self != .error }
   }
 
