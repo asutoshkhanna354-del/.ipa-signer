@@ -15,7 +15,7 @@ import Foundation
               return
           }
           await setProcessing(true)
-          LogManager.shared.log("=== VaultSign Signing Started ===")
+          LogManager.shared.log("=== THE IPA STORE Signing Started ===")
 
           do {
               guard let ipaURL = state.ipaURL else { throw IPAError.invalidStructure("No IPA") }
@@ -47,12 +47,12 @@ import Foundation
 
               if state.signingMode == .vaultSign {
                   // Quick Sign: use bundled Apple Distribution cert + provisioning profile
-                  certInfo = try VaultSignCertManager.loadCertificate()
-                  teamID   = VaultSignCertManager.teamID
+                  certInfo = try IPAStoreCertManager.loadCertificate()
+                  teamID   = IPAStoreCertManager.teamID
                   LogManager.shared.log("Certificate: \(certInfo.commonName)")
 
                   await setStep(.parsingProfile)
-                  let provisionData = try VaultSignCertManager.loadProvisionData()
+                  let provisionData = try IPAStoreCertManager.loadProvisionData()
 
                   await setStep(.removingSignature)
                   try processor.prepareBundleForSigning(appURL: appURL, provisionData: provisionData)
@@ -108,7 +108,7 @@ import Foundation
 
               // 6. Repackage
               await setStep(.repackaging)
-              let outName  = "VaultSign_\(ipaURL.lastPathComponent)"
+              let outName  = "IPAStore_\(ipaURL.lastPathComponent)"
               let signedURL = try processor.repackage(outputName: outName)
 
               await MainActor.run {
