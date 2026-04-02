@@ -1,9 +1,53 @@
 #!/bin/bash
-# Wrapper: adds -destination for archive builds (Xcode 16.2+ requires this)
-REAL="/Applications/Xcode_16.2.app/Contents/Developer/usr/bin/xcodebuild"
+  # xcodebuild wrapper: converts archive to build+package to avoid iOS platform requirement
+  REAL="/Applications/Xcode_16.2.app/Contents/Developer/usr/bin/xcodebuild"
 
-if [[ "$*" == *"archive"* ]]; then
-  exec "$REAL" "$@" -destination 'generic/platform=iOS'
-fi
+  if [[ " $* " == *" archive "* ]]; then
+    # Parse -archivePath from args, build new args without it
+    ARCHIVE_PATH=""
+    NEWARGS=()
+    SKIP_NEXT=0
+    for arg in "$@"; do
+      if [[ $SKIP_NEXT -eq 1 ]]; then
+        ARCHIVE_PATH="$arg"
+        SKIP_NEXT=0
+        continue
+      fi
+      if [[ "$arg" == "-archivePath" ]]; then
+        SKIP_NEXT=1
+        continue
+      fi
+      if [[ "$arg" == "archive" ]]; then
+        NEWARGS+=("build")
+        continue
+      fi
+      NEWARGS+=("$arg")
+    done
 
-exec "$REAL" "$@"
+    # Derive build output dir from archive path
+    BUILD_OUT="${ARCHIVE_PATH%/*}/_build"
+    NEWARGS+=("CONFIGURATION_BUILD_DIR=${BUILD_OUT}" "SKIP_INSTALL=NO" "ONLY_ACTIVE_ARCH=NO")
+
+    echo "[wrapper] Running build instead of archive (avoids iOS platform requirement)"
+    echo "[wrapper] Build output: $BUILD_OUT"
+    echo "[wrapper] Archive path: $ARCHIVE_PATH"
+
+    "$REAL" "${NEWARGS[@]}" || exit $?
+
+    # Reconstruct xcarchive structure that workflow expects
+    APP=$(find "${BUILD_OUT}" -maxdepth 2 -name "*.app" | head -1)
+    if [[ -z "$APP" ]]; then
+      echo "[wrapper] ERROR: no .app found in $BUILD_OUT"
+      ls -la "${BUILD_OUT}/" 2>/dev/null || true
+      exit 1
+    fi
+    echo "[wrapper] Found app: $APP"
+
+    mkdir -p "${ARCHIVE_PATH}/Products/Applications"
+    cp -r "$APP" "${ARCHIVE_PATH}/Products/Applications/"
+    echo "[wrapper] xcarchive created at $ARCHIVE_PATH"
+    exit 0
+  fi
+
+  exec "$REAL" "$@"
+  
