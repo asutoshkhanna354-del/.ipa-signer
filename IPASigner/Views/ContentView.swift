@@ -100,7 +100,7 @@ import SwiftUI
                       .foregroundColor(blue)
               }
               VStack(alignment: .leading, spacing: 3) {
-                  Text("VaultSign")
+                  Text("IPA Store")
                       .font(.system(size: 26, weight: .black))
                       .foregroundColor(.white)
                   Text("iOS App Signer")
@@ -274,7 +274,7 @@ import SwiftUI
                       Image(systemName: "bolt.fill").font(.system(size: 16, weight: .bold))
                   }
                   Text(state.isProcessing ? "Signing…"
-                       : state.signingMode == .vaultSign ? "Sign with VaultSign"
+                       : state.signingMode == .vaultSign ? "Sign with IPA Store"
                        : "Sign IPA")
                       .font(.system(size: 17, weight: .black))
               }
@@ -483,7 +483,7 @@ import SwiftUI
                   Color.black.ignoresSafeArea()
                   List {
                       Section {
-                          settingRow(icon: "lock.shield.fill", color: blue, title: "VaultSign", sub: "iOS IPA Signer v1.0")
+                          settingRow(icon: "lock.shield.fill", color: blue, title: "IPA Store", sub: "iOS IPA Signer v1.0")
                       }
                       .listRowBackground(Color.white.opacity(0.06))
 
