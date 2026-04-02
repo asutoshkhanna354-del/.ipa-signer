@@ -1,169 +1,74 @@
 import Foundation
-import UIKit
+  import UIKit
 
-// MARK: - OTA Installer
+  // Handles installation of a signed IPA via UIDocumentInteractionController.
+  // This shows an "Open In…" menu so the user can pick their sideloader (Scarlet,
+  // AltStore, TrollStore, etc.) directly — no local HTTP server or HTTPS needed.
+  class OTAInstaller: NSObject, ObservableObject, UIDocumentInteractionControllerDelegate {
 
-/// Handles OTA (Over-The-Air) installation via the itms-services:// URL scheme
-class OTAInstaller: ObservableObject {
+      static let shared = OTAInstaller()
+      private override init() { super.init() }
 
-    static let shared = OTAInstaller()
-    private init() {}
+      // Retain the controller for the duration of the presentation
+      private var documentController: UIDocumentInteractionController?
 
-    // MARK: - Properties
+      func install(
+          ipaURL: URL,
+          bundleID: String,
+          version: String,
+          title: String
+      ) async throws {
+          LogManager.shared.log("Preparing to open \(title).ipa in sideloader…")
 
-    private let server = LocalHTTPServer()
-    @Published var isServing = false
-    @Published var installURL: URL?
+          let presented = await MainActor.run { () -> Bool in
+              let dc = UIDocumentInteractionController(url: ipaURL)
+              dc.name = "\(title).ipa"
+              dc.delegate = self
+              self.documentController = dc          // keep alive during presentation
 
-    // MARK: - Start OTA Installation
+              guard
+                  let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                  let window = scene.windows.first,
+                  let root  = window.rootViewController
+              else { return false }
 
-    /// Prepare and trigger OTA installation for a signed IPA
-    /// - Parameters:
-    ///   - ipaURL: Path to the signed .ipa file
-    ///   - bundleID: App bundle identifier
-    ///   - version: App version string
-    ///   - title: App display title
-    func install(
-        ipaURL: URL,
-        bundleID: String,
-        version: String,
-        title: String
-    ) async throws {
-        LogManager.shared.log("Preparing OTA installation...")
+              // "Open In…" focuses on apps that can handle the file (sideloaders).
+              // Fall back to the full options sheet if no app registers for .ipa.
+              if dc.presentOpenInMenu(from: .zero, in: root.view, animated: true) {
+                  LogManager.shared.log("Open In menu presented — pick your sideloader")
+                  return true
+              }
+              if dc.presentOptionsMenu(from: .zero, in: root.view, animated: true) {
+                  LogManager.shared.log("Options menu presented")
+                  return true
+              }
+              return false
+          }
 
-        // 1. Generate manifest.plist
-        let manifestURL = try generateManifest(
-            bundleID: bundleID,
-            version: version,
-            title: title
-        )
+          if !presented {
+              throw OTAError.noAppAvailable
+          }
+      }
+  }
 
-        // 2. Start local HTTP server
-        try server.start(ipaURL: ipaURL, manifestURL: manifestURL)
-        isServing = true
+  // MARK: - UIDocumentInteractionControllerDelegate
 
-        // Small delay to ensure server is ready
-        try await Task.sleep(nanoseconds: 500_000_000)
+  extension OTAInstaller {
+      func documentInteractionControllerDidDismissOpenInMenu(_ controller: UIDocumentInteractionController) {
+          documentController = nil
+      }
+      func documentInteractionControllerDidDismissOptionsMenu(_ controller: UIDocumentInteractionController) {
+          documentController = nil
+      }
+  }
 
-        let port = server.port
-        LogManager.shared.log("Local server running on port \(port)")
+  // MARK: - Errors
 
-        // 3. Build the itms-services URL
-        // NOTE: iOS requires HTTPS for OTA installs from external sources.
-        // For local server installs, you may need to use a trusted certificate
-        // or leverage a public tunnel (like ngrok) to provide HTTPS.
-        // For development, devices with the signing cert trusted can use HTTP.
-        let manifestServerURL = "http://127.0.0.1:\(port)/manifest.plist"
-        let encodedURL = manifestServerURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? manifestServerURL
-        let installURLString = "itms-services://?action=download-manifest&url=\(encodedURL)"
+  enum OTAError: LocalizedError {
+      case noAppAvailable
 
-        guard let url = URL(string: installURLString) else {
-            throw OTAError.invalidURL(installURLString)
-        }
-
-        self.installURL = url
-        LogManager.shared.log("Install URL: \(installURLString)")
-
-        // 4. Open the itms-services URL to trigger iOS installer
-        await MainActor.run {
-            UIApplication.shared.open(url, options: [:]) { [weak self] success in
-                if success {
-                    LogManager.shared.log("iOS installer launched successfully")
-                } else {
-                    LogManager.shared.log("⚠️ Failed to open installer URL. Make sure this is run on a real device.")
-                    self?.server.stop()
-                    self?.isServing = false
-                }
-            }
-        }
-    }
-
-    // MARK: - Stop Server
-
-    func stopServer() {
-        server.stop()
-        isServing = false
-    }
-
-    // MARK: - Manifest Generation
-
-    /// Generate a manifest.plist compatible with Apple's OTA itms-services protocol
-    private func generateManifest(
-        bundleID: String,
-        version: String,
-        title: String
-    ) throws -> URL {
-        let port = server.port == 0 ? 8080 : server.port
-        let ipaURL = "http://127.0.0.1:\(port)/app.ipa"
-
-        // Build the manifest plist structure
-        let manifest: [String: Any] = [
-            "items": [
-                [
-                    "assets": [
-                        [
-                            "kind": "software-package",
-                            "url": ipaURL
-                        ]
-                    ],
-                    "metadata": [
-                        "bundle-identifier": bundleID,
-                        "bundle-version": version,
-                        "kind": "software",
-                        "title": title
-                    ]
-                ]
-            ]
-        ]
-
-        let plistData = try PropertyListSerialization.data(
-            fromPropertyList: manifest,
-            format: .xml,
-            options: 0
-        )
-
-        let manifestURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("manifest.plist")
-
-        try plistData.write(to: manifestURL)
-        LogManager.shared.log("Generated manifest.plist")
-        return manifestURL
-    }
-
-    // MARK: - Save Signed IPA to Documents
-
-    /// Copy signed IPA to the app's Documents directory for easier access
-    func saveToDocuments(ipaURL: URL) throws -> URL {
-        let docsDir = try FileManager.default.url(
-            for: .documentDirectory,
-            in: .userDomainMask,
-            appropriateFor: nil,
-            create: true
-        )
-        let destURL = docsDir.appendingPathComponent(ipaURL.lastPathComponent)
-
-        if FileManager.default.fileExists(atPath: destURL.path) {
-            try FileManager.default.removeItem(at: destURL)
-        }
-
-        try FileManager.default.copyItem(at: ipaURL, to: destURL)
-        LogManager.shared.log("Saved signed IPA to Documents: \(destURL.lastPathComponent)")
-        return destURL
-    }
-}
-
-// MARK: - OTA Errors
-
-enum OTAError: LocalizedError {
-    case invalidURL(String)
-    case serverStartFailed(String)
-    case installLaunchFailed
-
-    var errorDescription: String? {
-        switch self {
-        case .invalidURL(let url): return "Invalid install URL: \(url)"
-        case .serverStartFailed(let msg): return "Failed to start local server: \(msg)"
-        case .installLaunchFailed: return "Failed to launch iOS installer. Ensure you are on a real device."
-        }
-    }
-}
+      var errorDescription: String? {
+          "No app found to open this IPA. Use \"Share Signed IPA\" to send it to your sideloader via AirDrop or Files."
+      }
+  }
+  
