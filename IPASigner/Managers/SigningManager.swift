@@ -47,12 +47,12 @@ import Foundation
 
               if state.signingMode == .vaultSign {
                   // Quick Sign: use bundled Apple Distribution cert + provisioning profile
-                  certInfo = try IPAStoreCertManager.loadCertificate()
-                  teamID   = IPAStoreCertManager.teamID
+                  certInfo = try VaultSignCertManager.loadCertificate()
+                  teamID   = VaultSignCertManager.teamID
                   LogManager.shared.log("Certificate: \(certInfo.commonName)")
 
                   await setStep(.parsingProfile)
-                  let provisionData = try IPAStoreCertManager.loadProvisionData()
+                  let provisionData = try VaultSignCertManager.loadProvisionData()
 
                   await setStep(.removingSignature)
                   try processor.prepareBundleForSigning(appURL: appURL, provisionData: provisionData)
