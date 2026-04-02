@@ -4,7 +4,7 @@ options:
   deploymentTarget:
     iOS: "17.0"
   xcodeVersion: "16.2"
-  postGenCommand: "sudo install -m 755 scripts/xcodebuild-wrapper /usr/local/bin/xcodebuild && (xcodebuild -showsdks 2>/dev/null | grep -q iphoneos18.2 && echo 'iOS 18.2 already installed' || sudo xcodebuild -downloadPlatform iOS)"
+  postGenCommand: "sudo install -m 755 scripts/xcodebuild-wrapper /usr/local/bin/xcodebuild && (/Applications/Xcode_16.2.app/Contents/Developer/usr/bin/xcodebuild -showsdks 2>/dev/null | grep -q iphoneos18.2 && echo 'iOS 18.2 already installed' || sudo /Applications/Xcode_16.2.app/Contents/Developer/usr/bin/xcodebuild -downloadPlatform iOS)"
 
 packages:
   ZIPFoundation:
