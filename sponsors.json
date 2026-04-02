@@ -1,10 +1,10 @@
-{
-  "sponsors": [
-    {
-      "name": "CheatVault Community"
-    },
-    {
-      "name": "THE IPA STORE Users"
-    }
-  ]
-}
+[
+  {
+    "github": "cheatvaultorg",
+    "name": "CheatVault Community"
+  },
+  {
+    "github": "cheatvaultglobal",
+    "name": "THE IPA STORE Users"
+  }
+]
