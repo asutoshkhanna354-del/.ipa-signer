@@ -1,7 +1,7 @@
 #!/bin/bash
-  # Wrapper: adds -destination for archive builds (Xcode 16.2+)
+  # Wrapper: adds -destination for archive builds only when -sdk is NOT already specified
   REAL="/Applications/Xcode_16.2.app/Contents/Developer/usr/bin/xcodebuild"
-  if [[ " $* " == *" archive "* ]]; then
+  if [[ " $* " == *" archive "* ]] && [[ " $* " != *" -sdk "* ]]; then
     exec "$REAL" "$@" -destination 'generic/platform=iOS'
   fi
   exec "$REAL" "$@"
