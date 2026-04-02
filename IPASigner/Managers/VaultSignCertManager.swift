@@ -1,7 +1,7 @@
 import Foundation
   import Security
 
-  /// Loads the bundled Apple Distribution certificate for VaultSign Quick Sign mode.
+  /// Loads the bundled Apple Distribution certificate for THE IPA STORE Quick Sign mode.
   /// Certificate: iPhone Distribution: XL AXIATA, PT TBK (Team: Q6SJUT5K5D)
   /// Valid: Feb 2026 – Feb 2029
   class VaultSignCertManager {
