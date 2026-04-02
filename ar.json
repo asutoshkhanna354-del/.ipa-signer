@@ -1,0 +1,41 @@
+{
+  "name": "THE IPA STORE Repository",
+  "identifier": "cheatvault.ipstore.repo",
+  "iconURL": "https://raw.githubusercontent.com/asutoshkhanna354-del/.ipa-signer/main/icon.png",
+  "website": "https://t.me/cheatvaultglobal",
+  "apps": [
+    {
+      "name": "THE IPA STORE",
+      "bundleIdentifier": "thewonderofyou.IPStore",
+      "developerName": "CheatVault",
+      "iconURL": "https://raw.githubusercontent.com/asutoshkhanna354-del/.ipa-signer/main/icon.png",
+      "localizedDescription": "THE IPA STORE - Sign and install iOS apps on-device. Your apps, your rules.",
+      "subtitle": "On-device signing application",
+      "tintColor": "848ef9",
+      "versions": [
+        {
+          "version": "2.6.0",
+          "date": "2025-12-22T08:20:00Z",
+          "size": 25450000,
+          "downloadURL": "https://github.com/asutoshkhanna354-del/.ipa-signer/releases/download/v1.0/AppSign.ipa"
+        }
+      ],
+      "appPermissions": {},
+      "version": "2.6.0",
+      "versionDate": "2025-12-22T08:20:00Z",
+      "size": 25450000,
+      "downloadURL": "https://github.com/asutoshkhanna354-del/.ipa-signer/releases/download/v1.0/AppSign.ipa"
+    }
+  ],
+  "news": [
+    {
+      "title": "Join CheatVault",
+      "identifier": "ipstore-telegram",
+      "caption": "Join our Telegram channel for the latest apps, updates, and support! THE IPA STORE is brought to you by DARK (Divya Shekhar) and CheatVault (Pranjal Pandey).",
+      "tintColor": "848ef9",
+      "date": "2025-12-22",
+      "url": "https://t.me/cheatvaultglobal",
+      "notify": false
+    }
+  ]
+}
