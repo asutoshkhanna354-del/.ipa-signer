@@ -218,7 +218,7 @@ import Foundation
           var cd = Data(count: totalSize)
           cd.withUnsafeMutableBytes { ptr in
               let b = ptr.baseAddress!
-              func w32(_ v: UInt32, _ o: Int) { var x = v.bigEndian; withUnsafeBytes(of: &x) { b.advanced(by: o).copyMemory(from: $0.baseAddress!, byteCount: 4) } }
+              func w32(_ v: UInt32, _ o: Int) { var x = v.bigEndian; Swift.withUnsafeBytes(of: &x) { b.advanced(by: o).copyMemory(from: $0.baseAddress!, byteCount: 4) } }
               w32(Self.magicCodeDirectory, 0)
               w32(UInt32(totalSize), 4)
               w32(Self.cdVersion, 8)
@@ -540,7 +540,7 @@ import Foundation
       }
       mutating func appendU32BE(_ val: UInt32) {
           var v = val.bigEndian
-          append(contentsOf: withUnsafeBytes(of: &v) { Array($0) })
+          let bytes = Swift.withUnsafeBytes(of: &v) { Array($0) }; append(contentsOf: bytes)
       }
   }
   
