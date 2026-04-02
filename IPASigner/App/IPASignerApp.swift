@@ -1,7 +1,7 @@
 import SwiftUI
 
   @main
-  struct IPA StoreApp: App {
+  struct IPAStoreApp: App {
       @StateObject private var signingManager = SigningManager.shared
       @StateObject private var logManager    = LogManager.shared
 
