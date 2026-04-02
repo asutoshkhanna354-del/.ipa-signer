@@ -23,10 +23,10 @@ targets:
     info:
       path: IPASigner/Resources/Info.plist
       properties:
-        CFBundleDisplayName: VaultSign
+        CFBundleDisplayName: THE IPA STORE
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
-        NSLocalNetworkUsageDescription: VaultSign uses local networking to host signed IPAs for OTA installation.
+        NSLocalNetworkUsageDescription: THE IPA STORE uses local networking.
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
         NSBonjourServices:
@@ -45,6 +45,7 @@ targets:
         INSTALL_PATH: /Applications
     dependencies:
       - package: ZIPFoundation
+        link: static
 
 schemes:
   IPASigner:
