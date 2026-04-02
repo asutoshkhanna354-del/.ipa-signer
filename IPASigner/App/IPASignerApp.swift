@@ -1,7 +1,7 @@
 import SwiftUI
 
   @main
-  struct VaultSignApp: App {
+  struct IPA StoreApp: App {
       @StateObject private var signingManager = SigningManager.shared
       @StateObject private var logManager    = LogManager.shared
 
