@@ -1,38 +1,53 @@
 {
-  "name": "​THE IPA STORE Repository",
-  "identifier": "cheatvault.ipstore.repo",
-  "iconURL": "https://raw.githubusercontent.com/asutoshkhanna354-del/.ipa-signer/main/icon.png",
+  "name": "​THE IPA STORE",
+  "identifier": "com.ipastore.source",
+  "apiVersion": "1.0",
+  "subtitle": "The best apps, re-signed for you.",
+  "description": "THE IPA STORE — your source for re-signed IPA files.",
+  "iconURL": "https://raw.githubusercontent.com/asutoshkhanna354-del/ipa-host/main/icon.png",
   "website": "https://t.me/cheatvaultglobal",
+  "tintColor": "#0A84FF",
+  "featuredApps": [
+    "com.dts.freefireth"
+  ],
   "apps": [
+    {
+      "name": "Free Fire",
+      "bundleIdentifier": "com.dts.freefireth",
+      "developerName": "Garena International I",
+      "subtitle": "Battle Royale",
+      "version": "1.7.1",
+      "versionDate": "2026-03-31",
+      "versionDescription": "Free Fire IPA for on-device signing via THE IPA STORE.",
+      "downloadURL": "https://github.com/asutoshkhanna354-del/ipa-host/releases/download/v2.0/Free.Fire.ipa",
+      "localizedDescription": "Free Fire - Garena Free Fire: Fluorite Edition :)",
+      "iconURL": "https://raw.githubusercontent.com/asutoshkhanna354-del/ipa-host/main/free-fire-icon.jpg",
+      "tintColor": "#FF8C00",
+      "size": 1208735287,
+      "screenshotURLs": []
+    },
     {
       "name": "THE IPA STORE",
       "bundleIdentifier": "thewonderofyou.IPStore",
       "developerName": "CheatVault",
-      "iconURL": "https://raw.githubusercontent.com/asutoshkhanna354-del/.ipa-signer/main/icon.png",
-      "localizedDescription": "THE IPA STORE - Sign and install iOS apps on-device. Your apps, your rules.",
-      "subtitle": "On-device signing application",
-      "tintColor": "848ef9",
-      "versions": [
-        {
-          "version": "2.6.0",
-          "date": "2025-12-22T08:20:00Z",
-          "size": 25450000,
-          "downloadURL": "https://github.com/asutoshkhanna354-del/.ipa-signer/releases/download/v2.6.0/IPA.Store_2.6.0.ipa"
-        }
-      ],
-      "appPermissions": {},
+      "subtitle": "On-device IPA Signer",
       "version": "2.6.0",
-      "versionDate": "2025-12-22T08:20:00Z",
-      "size": 25450000,
-      "downloadURL": "https://github.com/asutoshkhanna354-del/.ipa-signer/releases/download/v2.6.0/IPA.Store_2.6.0.ipa"
+      "versionDate": "2025-12-22",
+      "versionDescription": "THE IPA STORE — on-device IPA signing.",
+      "downloadURL": "https://github.com/asutoshkhanna354-del/.ipa-signer/releases/download/v2.6.0/IPA.Store_2.6.0.ipa",
+      "localizedDescription": "Sign any IPA on your device. No PC required.",
+      "iconURL": "https://raw.githubusercontent.com/asutoshkhanna354-del/ipa-host/main/icon.png",
+      "tintColor": "#0A84FF",
+      "size": 14207413,
+      "screenshotURLs": []
     }
   ],
   "news": [
     {
       "title": "Join CheatVault",
-      "identifier": "ipstore-telegram",
-      "caption": "Join our Telegram channel for the latest apps, updates, and support! THE IPA STORE is brought to you by DARK (Divya Shekhar) and CheatVault (Pranjal Pandey).",
-      "tintColor": "848ef9",
+      "identifier": "ipstore-telegram-2025",
+      "caption": "Join our Telegram for the latest apps, updates, and support!",
+      "tintColor": "0A84FF",
       "date": "2025-12-22",
       "url": "https://t.me/cheatvaultglobal",
       "notify": false
